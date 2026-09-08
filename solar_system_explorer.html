@@ -1,0 +1,1166 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Solar System Explorer - Space Adventure</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #000011;
+            overflow: hidden;
+            color: white;
+        }
+
+        #game-container {
+            position: relative;
+            width: 100vw;
+            height: 100vh;
+        }
+
+        #solar-system {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            display: none;
+        }
+
+        #space-combat {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            display: none;
+        }
+
+        #main-menu {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            background: linear-gradient(135deg, #000011 0%, #0a0a2e 50%, #000011 100%);
+            z-index: 100;
+        }
+
+        .menu-title {
+            font-size: 4em;
+            color: #ffd700;
+            text-shadow: 0 0 20px #ffd700, 0 0 40px #ff8c00;
+            margin-bottom: 20px;
+            animation: glow 2s ease-in-out infinite alternate;
+        }
+
+        @keyframes glow {
+            from { text-shadow: 0 0 20px #ffd700, 0 0 40px #ff8c00; }
+            to { text-shadow: 0 0 30px #ffd700, 0 0 60px #ff8c00, 0 0 80px #ff4500; }
+        }
+
+        .menu-btn {
+            padding: 15px 40px;
+            margin: 10px;
+            font-size: 1.5em;
+            background: linear-gradient(45deg, #1e3c72, #2a5298);
+            border: 2px solid #4a90e2;
+            border-radius: 10px;
+            color: white;
+            cursor: pointer;
+            transition: all 0.3s;
+            min-width: 250px;
+        }
+
+        .menu-btn:hover {
+            background: linear-gradient(45deg, #2a5298, #1e3c72);
+            transform: scale(1.05);
+            box-shadow: 0 0 20px rgba(74, 144, 226, 0.6);
+        }
+
+        /* Solar System Styles */
+        .sun {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 80px;
+            height: 80px;
+            background: radial-gradient(circle, #ffd700, #ff8c00, #ff4500);
+            border-radius: 50%;
+            box-shadow: 0 0 60px #ffd700, 0 0 100px #ff8c00;
+            cursor: pointer;
+            z-index: 10;
+        }
+
+        .orbit {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            border: 1px dashed rgba(255, 255, 255, 0.2);
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            pointer-events: none;
+        }
+
+        .planet {
+            position: absolute;
+            border-radius: 50%;
+            cursor: pointer;
+            transition: transform 0.3s;
+            z-index: 20;
+        }
+
+        .planet:hover {
+            transform: scale(1.5);
+            box-shadow: 0 0 20px currentColor;
+        }
+
+        .planet-info {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: rgba(0, 0, 30, 0.9);
+            border: 2px solid #4a90e2;
+            border-radius: 15px;
+            padding: 20px;
+            max-width: 350px;
+            display: none;
+            z-index: 100;
+        }
+
+        .planet-info h2 {
+            color: #ffd700;
+            margin-bottom: 15px;
+            font-size: 2em;
+        }
+
+        .planet-info p {
+            margin: 10px 0;
+            line-height: 1.6;
+        }
+
+        .close-info {
+            position: absolute;
+            top: 10px;
+            right: 15px;
+            font-size: 2em;
+            cursor: pointer;
+            color: #ff4444;
+        }
+
+        /* Controls */
+        .controls {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 15px;
+            z-index: 100;
+        }
+
+        .control-btn {
+            padding: 10px 25px;
+            font-size: 1.2em;
+            background: linear-gradient(45deg, #1e3c72, #2a5298);
+            border: 2px solid #4a90e2;
+            border-radius: 8px;
+            color: white;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .control-btn:hover {
+            background: linear-gradient(45deg, #2a5298, #1e3c72);
+            transform: scale(1.05);
+        }
+
+        .speed-control {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background: rgba(0, 0, 30, 0.8);
+            padding: 10px 20px;
+            border-radius: 8px;
+            border: 2px solid #4a90e2;
+        }
+
+        .speed-slider {
+            width: 150px;
+            cursor: pointer;
+        }
+
+        /* Space Combat Styles */
+        #player-ship {
+            position: absolute;
+            width: 60px;
+            height: 60px;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 60 60"><polygon points="30,5 45,50 30,40 15,50" fill="%234a90e2"/><circle cx="30" cy="30" r="8" fill="%23ffd700"/></svg>') no-repeat center;
+            background-size: contain;
+            cursor: crosshair;
+            z-index: 50;
+            transition: transform 0.1s;
+        }
+
+        .bullet {
+            position: absolute;
+            width: 8px;
+            height: 20px;
+            background: linear-gradient(to top, #ff4500, #ffd700);
+            border-radius: 4px;
+            z-index: 45;
+        }
+
+        .alien {
+            position: absolute;
+            width: 50px;
+            height: 50px;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 50 50"><ellipse cx="25" cy="25" rx="20" ry="15" fill="%2300ff00"/><circle cx="18" cy="22" r="5" fill="%23000"/><circle cx="32" cy="22" r="5" fill="%23000"/><path d="M 15 35 Q 25 45 35 35" stroke="%23006400" stroke-width="3" fill="none"/></svg>') no-repeat center;
+            background-size: contain;
+            z-index: 40;
+        }
+
+        .alien-laser {
+            position: absolute;
+            width: 6px;
+            height: 15px;
+            background: linear-gradient(to bottom, #ff0000, #ff4500);
+            border-radius: 3px;
+            z-index: 44;
+        }
+
+        .explosion {
+            position: absolute;
+            width: 60px;
+            height: 60px;
+            background: radial-gradient(circle, #ffd700, #ff8c00, #ff4500, transparent);
+            border-radius: 50%;
+            animation: explode 0.5s ease-out forwards;
+            z-index: 60;
+        }
+
+        @keyframes explode {
+            0% { transform: scale(0.5); opacity: 1; }
+            100% { transform: scale(2); opacity: 0; }
+        }
+
+        .hud {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            background: rgba(0, 0, 30, 0.8);
+            border: 2px solid #4a90e2;
+            border-radius: 10px;
+            padding: 15px;
+            z-index: 100;
+        }
+
+        .hud-item {
+            margin: 8px 0;
+            font-size: 1.2em;
+        }
+
+        .health-bar {
+            width: 200px;
+            height: 20px;
+            background: #333;
+            border-radius: 10px;
+            overflow: hidden;
+            margin-top: 5px;
+        }
+
+        .health-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #ff0000, #00ff00);
+            transition: width 0.3s;
+        }
+
+        .score-display {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: rgba(0, 0, 30, 0.8);
+            border: 2px solid #ffd700;
+            border-radius: 10px;
+            padding: 15px;
+            font-size: 1.5em;
+            color: #ffd700;
+            z-index: 100;
+        }
+
+        /* Upgrade Menu */
+        #upgrade-menu {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(0, 0, 30, 0.95);
+            border: 3px solid #ffd700;
+            border-radius: 20px;
+            padding: 30px;
+            display: none;
+            z-index: 200;
+            max-width: 600px;
+        }
+
+        #upgrade-menu h2 {
+            color: #ffd700;
+            text-align: center;
+            margin-bottom: 20px;
+            font-size: 2.5em;
+        }
+
+        .upgrade-section {
+            margin: 20px 0;
+            padding: 15px;
+            background: rgba(74, 144, 226, 0.2);
+            border-radius: 10px;
+        }
+
+        .upgrade-section h3 {
+            color: #4a90e2;
+            margin-bottom: 15px;
+        }
+
+        .upgrade-option {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px;
+            margin: 5px 0;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .upgrade-option:hover {
+            background: rgba(74, 144, 226, 0.3);
+            transform: translateX(5px);
+        }
+
+        .upgrade-option.disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .credits {
+            text-align: center;
+            font-size: 1.5em;
+            color: #ffd700;
+            margin: 20px 0;
+        }
+
+        .back-btn {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            padding: 10px 20px;
+            background: rgba(255, 68, 68, 0.8);
+            border: 2px solid #ff4444;
+            border-radius: 8px;
+            color: white;
+            cursor: pointer;
+            z-index: 100;
+            font-size: 1em;
+        }
+
+        .back-btn:hover {
+            background: rgba(255, 68, 68, 1);
+        }
+
+        .planet-selector {
+            position: absolute;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0, 0, 30, 0.8);
+            border: 2px solid #4a90e2;
+            border-radius: 10px;
+            padding: 15px;
+            z-index: 100;
+        }
+
+        .planet-selector select {
+            padding: 8px 15px;
+            font-size: 1.1em;
+            background: #1e3c72;
+            border: 2px solid #4a90e2;
+            border-radius: 5px;
+            color: white;
+            cursor: pointer;
+        }
+
+        .stars {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+        }
+
+        .star {
+            position: absolute;
+            background: white;
+            border-radius: 50%;
+            animation: twinkle 2s ease-in-out infinite;
+        }
+
+        @keyframes twinkle {
+            0%, 100% { opacity: 0.3; }
+            50% { opacity: 1; }
+        }
+
+        .travel-indicator {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 3em;
+            color: #ffd700;
+            text-shadow: 0 0 20px #ffd700;
+            display: none;
+            z-index: 150;
+            animation: pulse 1s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 0.5; transform: translate(-50%, -50%) scale(1); }
+            50% { opacity: 1; transform: translate(-50%, -50%) scale(1.1); }
+        }
+
+        .level-indicator {
+            position: absolute;
+            bottom: 80px;
+            left: 20px;
+            background: rgba(0, 0, 30, 0.8);
+            border: 2px solid #ffd700;
+            border-radius: 10px;
+            padding: 10px 20px;
+            font-size: 1.2em;
+            color: #ffd700;
+            z-index: 100;
+        }
+
+        .wave-indicator {
+            position: absolute;
+            bottom: 80px;
+            right: 20px;
+            background: rgba(0, 0, 30, 0.8);
+            border: 2px solid #ff4444;
+            border-radius: 10px;
+            padding: 10px 20px;
+            font-size: 1.2em;
+            color: #ff4444;
+            z-index: 100;
+        }
+    </style>
+</head>
+<body>
+    <div id="game-container">
+        <!-- Main Menu -->
+        <div id="main-menu">
+            <h1 class="menu-title">🚀 Solar System Explorer</h1>
+            <button class="menu-btn" onclick="startSolarSystem()">🪐 Explore Solar System</button>
+            <button class="menu-btn" onclick="startSpaceCombat()">👾 Space Combat Mission</button>
+            <button class="menu-btn" onclick="showUpgrades()">⬆️ Upgrades & Shop</button>
+        </div>
+
+        <!-- Solar System View -->
+        <div id="solar-system">
+            <div class="stars" id="solar-stars"></div>
+            <button class="back-btn" onclick="backToMenu()">← Back to Menu</button>
+            
+            <div class="planet-selector">
+                <label for="planet-select">Navigate to: </label>
+                <select id="planet-select" onchange="focusOnPlanet()">
+                    <option value="sun">Sun</option>
+                    <option value="mercury">Mercury</option>
+                    <option value="venus">Venus</option>
+                    <option value="earth">Earth</option>
+                    <option value="mars">Mars</option>
+                    <option value="jupiter">Jupiter</option>
+                    <option value="saturn">Saturn</option>
+                    <option value="uranus">Uranus</option>
+                    <option value="neptune">Neptune</option>
+                </select>
+                <button class="control-btn" onclick="travelToPlanet()" style="margin-left: 10px;">🚀 Travel</button>
+            </div>
+
+            <div class="sun" data-name="Sun" data-size="1,392,700 km" data-distance="0 km" data-period="N/A"></div>
+
+            <div class="planet-info" id="planet-info">
+                <span class="close-info" onclick="closePlanetInfo()">&times;</span>
+                <h2 id="info-name">Planet Name</h2>
+                <p><strong>Size:</strong> <span id="info-size"></span></p>
+                <p><strong>Distance from Sun:</strong> <span id="info-distance"></span></p>
+                <p><strong>Orbital Period:</strong> <span id="info-period"></span></p>
+                <p id="info-fun-fact"></p>
+            </div>
+
+            <div class="controls">
+                <button class="control-btn" onclick="toggleAnimation()" id="play-pause">⏸️ Pause</button>
+                <div class="speed-control">
+                    <span>Speed:</span>
+                    <input type="range" min="0.1" max="5" step="0.1" value="1" class="speed-slider" id="speed-slider" oninput="updateSpeed()">
+                    <span id="speed-value">1x</span>
+                </div>
+                <button class="control-btn" onclick="resetView()">🔄 Reset View</button>
+            </div>
+        </div>
+
+        <!-- Space Combat View -->
+        <div id="space-combat">
+            <div class="stars" id="combat-stars"></div>
+            <button class="back-btn" onclick="backToMenu()">← Back to Menu</button>
+            
+            <div class="hud">
+                <div class="hud-item">Health:</div>
+                <div class="health-bar">
+                    <div class="health-fill" id="health-fill" style="width: 100%;"></div>
+                </div>
+                <div class="hud-item">Credits: <span id="credits" style="color: #ffd700;">0</span></div>
+                <div class="hud-item">Weapon: <span id="current-weapon" style="color: #4a90e2;">Basic Blaster</span></div>
+                <div class="hud-item">Ship: <span id="current-ship" style="color: #00ff00;">Scout Class</span></div>
+            </div>
+
+            <div class="score-display">
+                Score: <span id="score">0</span><br>
+                Wave: <span id="wave">1</span>
+            </div>
+
+            <div class="level-indicator">
+                Level: <span id="player-level">1</span>
+            </div>
+
+            <div class="wave-indicator">
+                Enemies: <span id="enemies-left">0</span>
+            </div>
+
+            <div id="player-ship"></div>
+            
+            <button class="control-btn" onclick="showUpgrades()" style="position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%);">⬆️ Upgrades</button>
+        </div>
+
+        <!-- Upgrade Menu -->
+        <div id="upgrade-menu">
+            <h2>🚀 Upgrade Center</h2>
+            <div class="credits">Credits: <span id="upgrade-credits">0</span></div>
+            
+            <div class="upgrade-section">
+                <h3>🛡️ Player Tier Upgrades</h3>
+                <div class="upgrade-option" onclick="buyUpgrade('tier', 1)" id="tier-1">
+                    <span>Cadet → Lieutenant (Tier 2)</span>
+                    <span style="color: #ffd700;">500 credits</span>
+                </div>
+                <div class="upgrade-option" onclick="buyUpgrade('tier', 2)" id="tier-2">
+                    <span>Lieutenant → Captain (Tier 3)</span>
+                    <span style="color: #ffd700;">1000 credits</span>
+                </div>
+                <div class="upgrade-option" onclick="buyUpgrade('tier', 3)" id="tier-3">
+                    <span>Captain → Commander (Tier 4)</span>
+                    <span style="color: #ffd700;">2000 credits</span>
+                </div>
+            </div>
+
+            <div class="upgrade-section">
+                <h3>🔫 Weapon Upgrades</h3>
+                <div class="upgrade-option" onclick="buyUpgrade('weapon', 1)" id="weapon-1">
+                    <span>Basic Blaster → Pulse Rifle</span>
+                    <span style="color: #ffd700;">300 credits</span>
+                </div>
+                <div class="upgrade-option" onclick="buyUpgrade('weapon', 2)" id="weapon-2">
+                    <span>Pulse Rifle → Plasma Cannon</span>
+                    <span style="color: #ffd700;">800 credits</span>
+                </div>
+                <div class="upgrade-option" onclick="buyUpgrade('weapon', 3)" id="weapon-3">
+                    <span>Plasma Cannon → Laser Destroyer</span>
+                    <span style="color: #ffd700;">1500 credits</span>
+                </div>
+            </div>
+
+            <div class="upgrade-section">
+                <h3>🚀 Ship Upgrades</h3>
+                <div class="upgrade-option" onclick="buyUpgrade('ship', 1)" id="ship-1">
+                    <span>Scout Class → Fighter Class</span>
+                    <span style="color: #ffd700;">600 credits</span>
+                </div>
+                <div class="upgrade-option" onclick="buyUpgrade('ship', 2)" id="ship-2">
+                    <span>Fighter Class → Bomber Class</span>
+                    <span style="color: #ffd700;">1200 credits</span>
+                </div>
+                <div class="upgrade-option" onclick="buyUpgrade('ship', 3)" id="ship-3">
+                    <span>Bomber Class → Dreadnought Class</span>
+                    <span style="color: #ffd700;">2500 credits</span>
+                </div>
+            </div>
+
+            <button class="menu-btn" onclick="closeUpgrades()" style="width: 100%; margin-top: 20px;">Close</button>
+        </div>
+
+        <div class="travel-indicator" id="travel-indicator">
+            🚀 Traveling to <span id="travel-destination"></span>...
+        </div>
+    </div>
+
+    <script>
+        // Game State
+        const gameState = {
+            credits: 0,
+            score: 0,
+            health: 100,
+            maxHealth: 100,
+            level: 1,
+            tier: 1,
+            weaponLevel: 1,
+            shipLevel: 1,
+            wave: 1,
+            isPlaying: true,
+            speed: 1,
+            currentMode: 'menu'
+        };
+
+        // Planet Data
+        const planets = [
+            { name: 'Mercury', size: '4,880 km', distance: '57.9 million km', period: '88 days', color: '#b5b5b5', orbitRadius: 120, sizePx: 8, funFact: 'Mercury is the smallest planet and closest to the Sun. It has extreme temperature variations!' },
+            { name: 'Venus', size: '12,104 km', distance: '108.2 million km', period: '225 days', color: '#e6c87a', orbitRadius: 170, sizePx: 12, funFact: 'Venus rotates backwards compared to most planets and is the hottest planet in our solar system!' },
+            { name: 'Earth', size: '12,742 km', distance: '149.6 million km', period: '365 days', color: '#6b93d6', orbitRadius: 230, sizePx: 13, funFact: 'Earth is the only known planet to support life and has one natural satellite - the Moon!' },
+            { name: 'Mars', size: '6,779 km', distance: '227.9 million km', period: '687 days', color: '#c1440e', orbitRadius: 300, sizePx: 10, funFact: 'Mars is known as the Red Planet due to iron oxide on its surface. It has the largest volcano in the solar system!' },
+            { name: 'Jupiter', size: '139,820 km', distance: '778.5 million km', period: '12 years', color: '#d8ca9d', orbitRadius: 400, sizePx: 35, funFact: 'Jupiter is the largest planet in our solar system and has over 79 moons including the four large Galilean moons!' },
+            { name: 'Saturn', size: '116,460 km', distance: '1.4 billion km', period: '29 years', color: '#f4d59e', orbitRadius: 500, sizePx: 30, funFact: 'Saturn is famous for its beautiful ring system made of ice and rock particles. It has 82 confirmed moons!' },
+            { name: 'Uranus', size: '50,724 km', distance: '2.9 billion km', period: '84 years', color: '#d1e7e7', orbitRadius: 600, sizePx: 20, funFact: 'Uranus rotates on its side! It\'s an ice giant with a blue-green color due to methane in its atmosphere.' },
+            { name: 'Neptune', size: '49,244 km', distance: '4.5 billion km', period: '165 years', color: '#5b5ddf', orbitRadius: 700, sizePx: 19, funFact: 'Neptune is the windiest planet with speeds reaching 2,100 km/h. It was the first planet located through mathematical calculations!' }
+        ];
+
+        let animationId = null;
+        let planetElements = [];
+        let bullets = [];
+        let aliens = [];
+        let alienLasers = [];
+        let playerPosition = { x: window.innerWidth / 2, y: window.innerHeight - 100 };
+        let keys = {};
+        let lastShot = 0;
+        let spawnInterval = null;
+
+        // Initialize Stars Background
+        function createStars(containerId, count = 200) {
+            const container = document.getElementById(containerId);
+            container.innerHTML = '';
+            for (let i = 0; i < count; i++) {
+                const star = document.createElement('div');
+                star.className = 'star';
+                star.style.left = Math.random() * 100 + '%';
+                star.style.top = Math.random() * 100 + '%';
+                star.style.width = Math.random() * 3 + 1 + 'px';
+                star.style.height = star.style.width;
+                star.style.animationDelay = Math.random() * 2 + 's';
+                container.appendChild(star);
+            }
+        }
+
+        // Initialize Solar System
+        function initSolarSystem() {
+            const solarSystem = document.getElementById('solar-system');
+            
+            // Create orbits and planets
+            planets.forEach((planet, index) => {
+                // Create orbit
+                const orbit = document.createElement('div');
+                orbit.className = 'orbit';
+                orbit.style.width = planet.orbitRadius * 2 + 'px';
+                orbit.style.height = planet.orbitRadius * 2 + 'px';
+                solarSystem.appendChild(orbit);
+
+                // Create planet
+                const planetEl = document.createElement('div');
+                planetEl.className = 'planet';
+                planetEl.dataset.name = planet.name;
+                planetEl.dataset.size = planet.size;
+                planetEl.dataset.distance = planet.distance;
+                planetEl.dataset.period = planet.period;
+                planetEl.dataset.funFact = planet.funFact;
+                planetEl.style.width = planet.sizePx + 'px';
+                planetEl.style.height = planet.sizePx + 'px';
+                planetEl.style.background = planet.color;
+                planetEl.style.boxShadow = `0 0 10px ${planet.color}`;
+                
+                planetEl.onclick = () => showPlanetInfo(planet);
+                
+                solarSystem.appendChild(planetEl);
+                planetElements.push({
+                    element: planetEl,
+                    orbitRadius: planet.orbitRadius,
+                    angle: (index / planets.length) * Math.PI * 2,
+                    speed: 0.001 + (0.005 / (index + 1))
+                });
+            });
+
+            // Add click event to Sun
+            document.querySelector('.sun').onclick = () => {
+                showPlanetInfo({
+                    name: 'Sun',
+                    size: '1,392,700 km',
+                    distance: '0 km (Center)',
+                    period: 'N/A',
+                    funFact: 'The Sun contains 99.86% of the solar system\'s mass! Its core temperature reaches 15 million °C.'
+                });
+            };
+
+            createStars('solar-stars');
+        }
+
+        // Animate Solar System
+        function animateSolarSystem() {
+            if (!gameState.isPlaying) return;
+
+            planetElements.forEach(planet => {
+                planet.angle += planet.speed * gameState.speed;
+                const x = Math.cos(planet.angle) * planet.orbitRadius;
+                const y = Math.sin(planet.angle) * planet.orbitRadius * 0.3; // Elliptical orbit
+                
+                const sun = document.querySelector('.sun');
+                const sunRect = sun.getBoundingClientRect();
+                const centerX = sunRect.left + sunRect.width / 2;
+                const centerY = sunRect.top + sunRect.height / 2;
+                
+                planet.element.style.left = (centerX + x - planet.element.offsetWidth / 2) + 'px';
+                planet.element.style.top = (centerY + y - planet.element.offsetHeight / 2) + 'px';
+            });
+
+            animationId = requestAnimationFrame(animateSolarSystem);
+        }
+
+        // Show Planet Info
+        function showPlanetInfo(planet) {
+            document.getElementById('info-name').textContent = planet.name;
+            document.getElementById('info-size').textContent = planet.size;
+            document.getElementById('info-distance').textContent = planet.distance;
+            document.getElementById('info-period').textContent = planet.period;
+            document.getElementById('info-fun-fact').textContent = planet.funFact || '';
+            document.getElementById('planet-info').style.display = 'block';
+        }
+
+        function closePlanetInfo() {
+            document.getElementById('planet-info').style.display = 'none';
+        }
+
+        // Controls
+        function toggleAnimation() {
+            gameState.isPlaying = !gameState.isPlaying;
+            document.getElementById('play-pause').textContent = gameState.isPlaying ? '⏸️ Pause' : '▶️ Play';
+            if (gameState.isPlaying) {
+                animateSolarSystem();
+            }
+        }
+
+        function updateSpeed() {
+            gameState.speed = parseFloat(document.getElementById('speed-slider').value);
+            document.getElementById('speed-value').textContent = gameState.speed.toFixed(1) + 'x';
+        }
+
+        function resetView() {
+            document.getElementById('speed-slider').value = 1;
+            gameState.speed = 1;
+            document.getElementById('speed-value').textContent = '1x';
+            closePlanetInfo();
+        }
+
+        function focusOnPlanet() {
+            // Could implement camera focus logic here
+        }
+
+        function travelToPlanet() {
+            const selected = document.getElementById('planet-select').value;
+            const indicator = document.getElementById('travel-indicator');
+            const destination = document.getElementById('travel-destination');
+            
+            destination.textContent = selected.charAt(0).toUpperCase() + selected.slice(1);
+            indicator.style.display = 'block';
+            
+            setTimeout(() => {
+                indicator.style.display = 'none';
+                // Could implement actual travel logic here
+                alert(`Welcome to ${destination.textContent}! You can now explore this location.`);
+            }, 2000);
+        }
+
+        // Space Combat Functions
+        function initSpaceCombat() {
+            createStars('combat-stars');
+            updatePlayerShip();
+            
+            // Event listeners
+            document.addEventListener('keydown', handleKeyDown);
+            document.addEventListener('keyup', handleKeyUp);
+            document.addEventListener('mousemove', handleMouseMove);
+            document.addEventListener('click', handleShoot);
+            
+            // Start enemy spawning
+            startEnemySpawning();
+            
+            // Start game loop
+            gameLoop();
+        }
+
+        function updatePlayerShip() {
+            const ship = document.getElementById('player-ship');
+            const shipLevels = ['Scout Class', 'Fighter Class', 'Bomber Class', 'Dreadnought Class'];
+            const weaponLevels = ['Basic Blaster', 'Pulse Rifle', 'Plasma Cannon', 'Laser Destroyer'];
+            
+            document.getElementById('current-ship').textContent = shipLevels[gameState.shipLevel - 1];
+            document.getElementById('current-weapon').textContent = weaponLevels[gameState.weaponLevel - 1];
+            
+            // Update ship appearance based on level
+            const colors = ['#4a90e2', '#00ff00', '#ff8c00', '#ff0000'];
+            ship.style.filter = `hue-rotate(${gameState.shipLevel * 30}deg)`;
+        }
+
+        function handleKeyDown(e) {
+            keys[e.key] = true;
+        }
+
+        function handleKeyUp(e) {
+            keys[e.key] = false;
+        }
+
+        function handleMouseMove(e) {
+            const ship = document.getElementById('player-ship');
+            playerPosition.x = e.clientX - 30;
+            playerPosition.y = e.clientY - 30;
+            ship.style.left = playerPosition.x + 'px';
+            ship.style.top = playerPosition.y + 'px';
+        }
+
+        function handleShoot(e) {
+            if (gameState.currentMode !== 'combat') return;
+            
+            const now = Date.now();
+            const fireRate = Math.max(100, 500 - gameState.weaponLevel * 100);
+            
+            if (now - lastShot > fireRate) {
+                shootBullet();
+                lastShot = now;
+            }
+        }
+
+        function shootBullet() {
+            const bullet = document.createElement('div');
+            bullet.className = 'bullet';
+            bullet.style.left = (playerPosition.x + 26) + 'px';
+            bullet.style.top = playerPosition.y + 'px';
+            document.getElementById('space-combat').appendChild(bullet);
+            bullets.push({ element: bullet, y: playerPosition.y });
+        }
+
+        function spawnAlien() {
+            const alien = document.createElement('div');
+            alien.className = 'alien';
+            const x = Math.random() * (window.innerWidth - 50);
+            alien.style.left = x + 'px';
+            alien.style.top = '-50px';
+            document.getElementById('space-combat').appendChild(alien);
+            aliens.push({ element: alien, x: x, y: -50, speed: 1 + gameState.wave * 0.5 });
+        }
+
+        function shootAlienLaser(alien) {
+            const laser = document.createElement('div');
+            laser.className = 'alien-laser';
+            laser.style.left = (alien.x + 22) + 'px';
+            laser.style.top = (alien.y + 40) + 'px';
+            document.getElementById('space-combat').appendChild(laser);
+            alienLasers.push({ element: laser, y: alien.y + 40 });
+        }
+
+        function createExplosion(x, y) {
+            const explosion = document.createElement('div');
+            explosion.className = 'explosion';
+            explosion.style.left = (x - 30) + 'px';
+            explosion.style.top = (y - 30) + 'px';
+            document.getElementById('space-combat').appendChild(explosion);
+            
+            setTimeout(() => explosion.remove(), 500);
+        }
+
+        function updateHUD() {
+            document.getElementById('score').textContent = gameState.score;
+            document.getElementById('wave').textContent = gameState.wave;
+            document.getElementById('credits').textContent = gameState.credits;
+            document.getElementById('upgrade-credits').textContent = gameState.credits;
+            document.getElementById('player-level').textContent = gameState.level;
+            document.getElementById('enemies-left').textContent = aliens.length;
+            
+            const healthPercent = (gameState.health / gameState.maxHealth) * 100;
+            document.getElementById('health-fill').style.width = healthPercent + '%';
+        }
+
+        function checkCollisions() {
+            const playerRect = {
+                x: playerPosition.x,
+                y: playerPosition.y,
+                width: 60,
+                height: 60
+            };
+
+            // Check bullet-alien collisions
+            bullets.forEach((bullet, bIndex) => {
+                aliens.forEach((alien, aIndex) => {
+                    const bulletRect = { x: parseFloat(bullet.element.style.left), y: bullet.y, width: 8, height: 20 };
+                    const alienRect = { x: alien.x, y: alien.y, width: 50, height: 50 };
+
+                    if (bulletRect.x < alienRect.x + alienRect.width &&
+                        bulletRect.x + bulletRect.width > alienRect.x &&
+                        bulletRect.y < alienRect.y + alienRect.height &&
+                        bulletRect.y + bulletRect.height > alienRect.y) {
+                        
+                        // Collision detected
+                        createExplosion(alien.x + 25, alien.y + 25);
+                        alien.element.remove();
+                        bullet.element.remove();
+                        aliens.splice(aIndex, 1);
+                        bullets.splice(bIndex, 1);
+                        
+                        gameState.score += 100 * gameState.wave;
+                        gameState.credits += 10 * gameState.wave;
+                        
+                        // Level up check
+                        if (gameState.score >= gameState.level * 1000) {
+                            gameState.level++;
+                            gameState.maxHealth += 20;
+                            gameState.health = gameState.maxHealth;
+                        }
+                    }
+                });
+            });
+
+            // Check alien laser-player collisions
+            alienLasers.forEach((laser, index) => {
+                const laserRect = { x: parseFloat(laser.element.style.left), y: laser.y, width: 6, height: 15 };
+
+                if (laserRect.x < playerRect.x + playerRect.width &&
+                    laserRect.x + laserRect.width > playerRect.x &&
+                    laserRect.y < playerRect.y + playerRect.height &&
+                    laserRect.y + laserRect.height > playerRect.y) {
+                    
+                    laser.element.remove();
+                    alienLasers.splice(index, 1);
+                    
+                    gameState.health -= 10;
+                    if (gameState.health <= 0) {
+                        gameOver();
+                    }
+                }
+            });
+
+            // Check alien-player collisions
+            aliens.forEach((alien, index) => {
+                const alienRect = { x: alien.x, y: alien.y, width: 50, height: 50 };
+
+                if (alienRect.x < playerRect.x + playerRect.width &&
+                    alienRect.x + alienRect.width > playerRect.x &&
+                    alienRect.y < playerRect.y + playerRect.height &&
+                    alienRect.y + alienRect.height > playerRect.y) {
+                    
+                    createExplosion(alien.x + 25, alien.y + 25);
+                    alien.element.remove();
+                    aliens.splice(index, 1);
+                    
+                    gameState.health -= 20;
+                    if (gameState.health <= 0) {
+                        gameOver();
+                    }
+                }
+            });
+        }
+
+        function gameLoop() {
+            if (gameState.currentMode !== 'combat') return;
+
+            // Update bullets
+            bullets.forEach((bullet, index) => {
+                bullet.y -= 10;
+                bullet.element.style.top = bullet.y + 'px';
+                
+                if (bullet.y < -20) {
+                    bullet.element.remove();
+                    bullets.splice(index, 1);
+                }
+            });
+
+            // Update aliens
+            aliens.forEach((alien, index) => {
+                alien.y += alien.speed;
+                alien.element.style.top = alien.y + 'px';
+                
+                // Random shooting
+                if (Math.random() < 0.01 * gameState.wave) {
+                    shootAlienLaser(alien);
+                }
+                
+                if (alien.y > window.innerHeight) {
+                    alien.element.remove();
+                    aliens.splice(index, 1);
+                }
+            });
+
+            // Update alien lasers
+            alienLasers.forEach((laser, index) => {
+                laser.y += 8;
+                laser.element.style.top = laser.y + 'px';
+                
+                if (laser.y > window.innerHeight) {
+                    laser.element.remove();
+                    alienLasers.splice(index, 1);
+                }
+            });
+
+            checkCollisions();
+            updateHUD();
+
+            // Wave progression
+            if (aliens.length === 0 && Math.random() < 0.01) {
+                gameState.wave++;
+            }
+
+            requestAnimationFrame(gameLoop);
+        }
+
+        function startEnemySpawning() {
+            if (spawnInterval) clearInterval(spawnInterval);
+            
+            spawnInterval = setInterval(() => {
+                if (gameState.currentMode === 'combat' && aliens.length < 5 + gameState.wave) {
+                    spawnAlien();
+                }
+            }, 2000 / gameState.wave);
+        }
+
+        function gameOver() {
+            alert(`Game Over! Final Score: ${gameState.score}\nWave Reached: ${gameState.wave}`);
+            backToMenu();
+        }
+
+        // Upgrade System
+        function buyUpgrade(type, level) {
+            const costs = {
+                tier: [0, 500, 1000, 2000],
+                weapon: [0, 300, 800, 1500],
+                ship: [0, 600, 1200, 2500]
+            };
+
+            const currentLevel = gameState[type + 'Level'] || gameState.tier;
+            
+            if (level !== currentLevel + 1) return;
+            if (gameState.credits < costs[type][level]) {
+                alert('Not enough credits!');
+                return;
+            }
+
+            gameState.credits -= costs[type][level];
+            
+            if (type === 'tier') {
+                gameState.tier = level;
+            } else {
+                gameState[type + 'Level'] = level;
+            }
+
+            updatePlayerShip();
+            updateUpgradeMenu();
+            updateHUD();
+        }
+
+        function updateUpgradeMenu() {
+            const tiers = ['', 'Cadet', 'Lieutenant', 'Captain', 'Commander'];
+            const weapons = ['', 'Basic Blaster', 'Pulse Rifle', 'Plasma Cannon', 'Laser Destroyer'];
+            const ships = ['', 'Scout Class', 'Fighter Class', 'Bomber Class', 'Dreadnought Class'];
+            
+            for (let i = 1; i <= 3; i++) {
+                document.getElementById(`tier-${i}`).classList.toggle('disabled', gameState.tier !== i);
+                document.getElementById(`weapon-${i}`).classList.toggle('disabled', gameState.weaponLevel !== i);
+                document.getElementById(`ship-${i}`).classList.toggle('disabled', gameState.shipLevel !== i);
+            }
+        }
+
+        // Navigation
+        function startSolarSystem() {
+            gameState.currentMode = 'solar';
+            document.getElementById('main-menu').style.display = 'none';
+            document.getElementById('solar-system').style.display = 'block';
+            document.getElementById('space-combat').style.display = 'none';
+            
+            if (!planetElements.length) {
+                initSolarSystem();
+            }
+            animateSolarSystem();
+        }
+
+        function startSpaceCombat() {
+            gameState.currentMode = 'combat';
+            document.getElementById('main-menu').style.display = 'none';
+            document.getElementById('solar-system').style.display = 'none';
+            document.getElementById('space-combat').style.display = 'block';
+            
+            // Reset combat state
+            gameState.health = gameState.maxHealth;
+            gameState.score = 0;
+            gameState.wave = 1;
+            bullets = [];
+            aliens = [];
+            alienLasers = [];
+            
+            // Clear previous elements
+            document.querySelectorAll('.bullet, .alien, .alien-laser, .explosion').forEach(el => el.remove());
+            
+            initSpaceCombat();
+        }
+
+        function showUpgrades() {
+            document.getElementById('upgrade-menu').style.display = 'block';
+            updateUpgradeMenu();
+        }
+
+        function closeUpgrades() {
+            document.getElementById('upgrade-menu').style.display = 'none';
+        }
+
+        function backToMenu() {
+            gameState.currentMode = 'menu';
+            
+            if (animationId) {
+                cancelAnimationFrame(animationId);
+            }
+            
+            if (spawnInterval) {
+                clearInterval(spawnInterval);
+            }
+
+            document.removeEventListener('keydown', handleKeyDown);
+            document.removeEventListener('keyup', handleKeyUp);
+            document.removeEventListener('mousemove', handleMouseMove);
+            document.removeEventListener('click', handleShoot);
+
+            document.getElementById('main-menu').style.display = 'flex';
+            document.getElementById('solar-system').style.display = 'none';
+            document.getElementById('space-combat').style.display = 'none';
+            document.getElementById('upgrade-menu').style.display = 'none';
+            closePlanetInfo();
+
+            // Clean up game elements
+            bullets.forEach(b => b.element.remove());
+            aliens.forEach(a => a.element.remove());
+            alienLasers.forEach(l => l.element.remove());
+            bullets = [];
+            aliens = [];
+            alienLasers = [];
+        }
+
+        // Initialize on load
+        window.onload = () => {
+            createStars('solar-stars');
+        };
+    </script>
+</body>
+</html>
